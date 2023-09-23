@@ -85,32 +85,45 @@ const fruit = [
 
 function search(str) {
   let results = [];
-  if (str === "") return showSuggestions(results);
+  // clear suggestions when input is deleted
+  if (str === "") return showSuggestions([]);
 
   results = fruit.filter((val) =>
     val.toLowerCase().includes(str.toLowerCase())
   );
-  showSuggestions(results);
   return results;
 }
 
 function searchHandler(e) {
-  search(input.value);
+  showSuggestions(search(input.value), input.value);
 }
 
 function showSuggestions(results, inputVal) {
+  // clear suggestions
   suggestions.innerHTML = "";
-  slicedResults = results.slice(0, 6);
+  // narrow results array down to max of 6 items
+  results ? (slicedResults = results.slice(0, 6)) : (slicedResults = []);
+  // loop over new array and add them to ul
   for (fruitItem of slicedResults) {
+    // matching letters bold
+    const regExp = new RegExp(`${inputVal}`, "i");
+    const boldFruit = fruitItem.replace(regExp, "<strong>$&</strong>");
+
     const listItem = document.createElement("li");
-    listItem.textContent = fruitItem;
+    listItem.innerHTML = boldFruit;
     suggestions.append(listItem);
   }
 }
 
 function useSuggestion(e) {
-  const targetFruit = e.target.textContent;
+  let targetFruit;
+  e.target.nodeName === "STRONG"
+    ? (targetFruit = e.target.parentElement.textContent)
+    : (targetFruit = e.target.textContent);
+
   input.value = targetFruit;
+  // clear suggestions
+  showSuggestions([]);
 }
 
 input.addEventListener("keyup", searchHandler);
